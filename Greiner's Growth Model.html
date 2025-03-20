@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baker's Delight Growth Journey</title>
+    <style>
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #4ecdc4;
+            --dark: #292f36;
+            --light: #f7fff7;
+            --warning: #ffe66d;
+            --success: #6bff84;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        #game-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--light);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            min-height: 600px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 8px;
+        }
+        
+        .game-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            height: 100%;
+        }
+        
+        .active-screen {
+            display: flex;
+        }
+        
+        #intro-screen {
+            text-align: center;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: #ff8c8c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .bakery-visual {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .bakery-image {
+            width: 100%;
+            height: 200px;
+            background-position: center;
+            background-size: cover;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .bakery-stats {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .stat {
+            text-align: center;
+            padding: 5px;
+            background-color: rgba(78, 205, 196, 0.1);
+            border-radius: 5px;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: var(--primary);
+        }
+        
+        .game-panel {
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .phase-header {
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .phase-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .crisis-meter {
+            width: 100%;
+            height: 20px;
+            background-color: #eee;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .crisis-fill {
+            height: 100%;
+            background-color: var(--warning);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .scenario-content {
+            margin-bottom: 20px;
+        }
+        
+        .decision-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        
+        .decision-btn {
+            text-align: left;
+            padding: 10px 15px;
+            background-color: var(--secondary);
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .decision-btn:hover {
+            background-color: #5fddD4;
+            transform: translateY(-2px);
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            margin-left: 5px;
+            cursor: help;
+        }
+        
+        .tooltip .tooltip-icon {
+            background-color: var(--secondary);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 250px;
+            background-color: var(--dark);
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .feedback-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .positive {
+            background-color: rgba(107, 255, 132, 0.2);
+            border-left: 4px solid var(--success);
+        }
+        
+        .negative {
+            background-color: rgba(255, 107, 107, 0.2);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .neutral {
+            background-color: rgba(255, 230, 109, 0.2);
+            border-left: 4px solid var(--warning);
+        }
+        
+        #phase-transition-screen {
+            text-align: center;
+            padding: 30px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .transition-header {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .transition-content {
+            margin-bottom: 30px;
+        }
+        
+        .results-container {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-header {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .results-summary {
+            margin-bottom: 30px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .phase-summary {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: rgba(78, 205, 196, 0.1);
+            border-radius: 5px;
+            text-align: left;
+        }
+        
+        .mobile-warning {
+            display: none;
+            background-color: var(--warning);
+            color: var(--dark);
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+            }
+            
+            .mobile-warning {
+                display: block;
+            }
+        }
+        
+        /* Additional visuals */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            pointer-events: none;
+            display: none;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            position: relative;
+            animation: modalopen 0.4s;
+        }
+        
+        @keyframes modalopen {
+            from {opacity: 0; transform: translateY(-30px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        
+        .close-modal {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close-modal:hover,
+        .close-modal:focus {
+            color: var(--primary);
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div class="mobile-warning">
+            For the best experience, play on a larger screen.
+        </div>
+        
+        <header>
+            <h1>Baker's Delight Growth Journey</h1>
+            <p>Navigate through Greiner's Growth Model to build a successful bakery empire</p>
+        </header>
+        
+        <!-- Intro Screen -->
+        <div id="intro-screen" class="game-screen active-screen">
+            <h2>Welcome to Baker's Delight!</h2>
+            <p>You and your friend have started a small bakery with a passion for creating delicious treats. Your journey will take you through the six phases of organizational growth according to Greiner's Growth Model.</p>
+            <p>At each phase, you'll face different challenges and eventually a crisis that must be overcome to move forward.</p>
+            <p>Your decisions will impact your bakery's:</p>
+            <ul style="text-align: left; margin: 10px auto; max-width: 400px;">
+                <li>Revenue</li>
+                <li>Customer Satisfaction</li>
+                <li>Employee Morale</li>
+                <li>Operational Efficiency</li>
+            </ul>
+            <p>Make wise decisions to guide your bakery through each growth phase!</p>
+            <button id="start-game">Start Your Bakery Journey</button>
+        </div>
+        
+        <!-- Main Game Screen -->
+        <div id="main-game" class="game-screen">
+            <div class="game-area">
+                <!-- Bakery visualization side -->
+                <div class="bakery-visual">
+                    <div id="bakery-image" class="bakery-image"></div>
+                    <div class="bakery-stats">
+                        <div class="stat">
+                            <div>Revenue</div>
+                            <div id="revenue-stat" class="stat-value">£10,000</div>
+                        </div>
+                        <div class="stat">
+                            <div>Customer Satisfaction</div>
+                            <div id="customer-stat" class="stat-value">85%</div>
+                        </div>
+                        <div class="stat">
+                            <div>Employee Morale</div>
+                            <div id="morale-stat" class="stat-value">90%</div>
+                        </div>
+                        <div class="stat">
+                            <div>Efficiency</div>
+                            <div id="efficiency-stat" class="stat-value">70%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Game panel side -->
+                <div class="game-panel">
+                    <div class="phase-header">
+                        <div class="phase-title">Phase 1: Creativity</div>
+                        <div class="tooltip">
+                            <span class="tooltip-icon">?</span>
+                            <span class="tooltip-text" id="phase-tooltip">In the Creativity phase, businesses focus on creating products and finding market niches. Structure is informal with founders doing most of the work.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="crisis-container">
+                        <div class="crisis-label">Crisis Level:</div>
+                        <div class="crisis-meter">
+                            <div id="crisis-fill" class="crisis-fill"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="scenario-container" class="scenario-content">
+                        <p id="scenario-text">You've been baking for two months now. Your small shop is starting to get noticed in the neighborhood. How do you want to handle the increasing customer demand?</p>
+                    </div>
+                    
+                    <div id="decision-container" class="decision-options">
+                        <!-- Decision buttons will be added dynamically -->
+                    </div>
+                    
+                    <div id="feedback-message" class="feedback-message"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Phase Transition Screen -->
+        <div id="phase-transition" class="game-screen">
+            <div id="phase-transition-screen">
+                <h2 id="transition-title" class="transition-header">Crisis of Leadership</h2>
+                <div id="transition-content" class="transition-content">
+                    <p>Your bakery has grown beyond what you can manage informally. Customers are waiting too long, orders are getting mixed up, and you're working 16-hour days.</p>
+                    <p>It's time to establish more structure and formal leadership to continue growing.</p>
+                </div>
+                <button id="continue-button">Continue to Next Phase</button>
+            </div>
+        </div>
+        
+        <!-- Results Screen -->
+        <div id="results-screen" class="game-screen">
+            <div class="results-container">
+                <h2 class="results-header">Your Baker's Delight Journey</h2>
+                <div class="results-summary">
+                    <p>Congratulations! You've successfully guided Baker's Delight through all six phases of Greiner's Growth Model, transforming from a small bakery into a thriving business network. You've navigated each organizational crisis and applied key management principles along the journey.</p>
+                    <p>Final Statistics:</p>
+                    <div class="bakery-stats" style="max-width: 400px; margin: 0 auto;">
+                        <div class="stat">
+                            <div>Revenue</div>
+                            <div id="final-revenue" class="stat-value">£500,000</div>
+                        </div>
+                        <div class="stat">
+                            <div>Customer Satisfaction</div>
+                            <div id="final-customer" class="stat-value">92%</div>
+                        </div>
+                        <div class="stat">
+                            <div>Employee Morale</div>
+                            <div id="final-morale" class="stat-value">88%</div>
+                        </div>
+                        <div class="stat">
+                            <div>Efficiency</div>
+                            <div id="final-efficiency" class="stat-value">95%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="journey-summary">
+                    <!-- Will be filled dynamically with phase summaries -->
+                </div>
+                
+                <h3>What You've Learned</h3>
+                <p>Greiner's Growth Model shows that organizations go through predictable phases of growth, each ending with a specific crisis that must be addressed to continue growth.</p>
+                <p>By understanding these phases, you can anticipate challenges and prepare your organization for the next growth transition.</p>
+                
+                <button id="restart-game">Play Again</button>
+            </div>
+        </div>
+        
+        <!-- Help Modal -->
+        <div id="help-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>Greiner's Growth Model Explained</h2>
+                <p>This model illustrates how organizations evolve through six predictable phases, each ending with a specific crisis that must be addressed to continue growth:</p>
+                
+                <h3>Phase 1: Creativity</h3>
+                <p>Focus on product creation and finding market fit. Informal structure with founders wearing many hats.</p>
+                <p><strong>Crisis of Leadership:</strong> Growth requires more management structure.</p>
+                
+                <h3>Phase 2: Direction</h3>
+                <p>Centralized leadership with clear hierarchy. Focus on efficiency and standardization.</p>
+                <p><strong>Crisis of Autonomy:</strong> Lower-level employees feel restricted by top-down control.</p>
+                
+                <h3>Phase 3: Delegation</h3>
+                <p>Authority is pushed down to lower-level managers. Focus on expansion through motivated managers.</p>
+                <p><strong>Crisis of Control:</strong> Top management feels they're losing control over the decentralized organization.</p>
+                
+                <h3>Phase 4: Coordination</h3>
+                <p>Formal systems and processes are established to regain control while maintaining delegation.</p>
+                <p><strong>Crisis of Red Tape:</strong> Organization becomes bogged down in procedures and bureaucracy.</p>
+                
+                <h3>Phase 5: Collaboration</h3>
+                <p>Focus on teamwork, spontaneity, and flexibility to overcome bureaucracy.</p>
+                <p><strong>Crisis of Growth:</strong> Organization struggles to find new ways to grow.</p>
+                
+                <h3>Phase 6: Alliances</h3>
+                <p>Growth through partnerships, mergers, or networks with external organizations.</p>
+                <p><strong>Crisis of Alliances:</strong> Managing complex relationships with partners becomes challenging.</p>
+            </div>
+        </div>
+        
+        <canvas id="confetti-canvas"></canvas>
+    </div>
+    
+    <script>
+        // Game data structure
+        const gameData = {
+            currentPhase: 0,
+            crisisLevel: 0,
+            decisionsMade: 0,
+            stats: {
+                revenue: 10000,
+                customerSatisfaction: 85,
+                employeeMorale: 90,
+                efficiency: 70
+            },
+            history: [],
+            phaseNames: [
+                "Creativity",
+                "Direction",
+                "Delegation",
+                "Coordination",
+                "Collaboration",
+                "Alliances"
+            ],
+            crisisNames: [
+                "Crisis of Leadership",
+                "Crisis of Autonomy",
+                "Crisis of Control",
+                "Crisis of Red Tape",
+                "Crisis of Growth",
+                "Crisis of Alliances"
+            ],
+            bakeryImages: [
+                "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 800 600\"><rect width=\"800\" height=\"600\" fill=\"%23f9f2ea\"/><rect x=\"200\" y=\"200\" width=\"400\" height=\"300\" fill=\"%23d4a373\"/><rect x=\"250\" y=\"300\" width=\"300\" height=\"200\" fill=\"%23faedcd\"/><rect x=\"300\" y=\"350\" width=\"200\" height=\"50\" fill=\"%23d4a373\"/><circle cx=\"390\" cy=\"375\" r=\"10\" fill=\"%23000\"/><path d=\"M200,200 L400,100 L600,200 Z\" fill=\"%23e9edc9\"/><rect x=\"350\" y=\"150\" width=\"100\" height=\"50\" fill=\"%23faedcd\"/><text x=\"400\" y=\"185\" text-anchor=\"middle\" font-size=\"20\" fill=\"%23d4a373\">BAKERY</text></svg>')",
+                
+                "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 800 600\"><rect width=\"800\" height=\"600\" fill=\"%23f9f2ea\"/><rect x=\"150\" y=\"200\" width=\"500\" height=\"300\" fill=\"%23d4a373\"/><rect x=\"200\" y=\"300\" width=\"400\" height=\"200\" fill=\"%23faedcd\"/><rect x=\"250\" y=\"350\" width=\"100\" height=\"50\" fill=\"%23d4a373\"/><circle cx=\"290\" cy=\"375\" r=\"10\" fill=\"%23000\"/><rect x=\"450\" y=\"350\" width=\"100\" height=\"50\" fill=\"%23d4a373\"/><circle cx=\"490\" cy=\"375\" r=\"10\" fill=\"%23000\"/><path d=\"M150,200 L400,100 L650,200 Z\" fill=\"%23e9edc9\"/><rect x=\"330\" y=\"150\" width=\"140\" height=\"50\" fill=\"%23faedcd\"/><text x=\"400\" y=\"185\" text-anchor=\"middle\" font-size=\"20\" fill=\"%23d4a373\">BAKER%27S DELIGHT</text></svg>')",
+                
+                "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 800 600\"><rect width=\"800\" height=\"600\" fill=\"%23f9f2ea\"/><rect x=\"100\" y=\"200\" width=\"600\" height=\"300\" fill=\"%23d4a373\"/><rect x=\"150\" y=\"300\" width=\"500\" height=\"200\" fill=\"%23faedcd\"/><rect x=\"200\" y=\"350\" width=\"100\" height=\"50\" fill=\"%23d4a373\"/><circle cx=\"240\" cy=\"375\" r=\"10\" fill=\"%23000\"/><rect x=\"350\" y=\"350\" width=\"100\" height=\"50\" fill=\"%23d4a373\"/><circle cx=\"390\" cy=\"375\" r=\"10\" fill=\"%23000\"/><rect x=\"500\" y=\"350\" width=\"100\" height=\"50\" fill=\"%23d4a373\"/><circle cx=\"540\" cy=\"375\" r=\"10\" fill=\"%23000\"/><path d=\"M100,200 L400,80 L700,200 Z\" fill=\"%23e9edc9\"/><rect x=\"300\" y=\"120\" width=\"200\" height=\"60\" fill=\"%23faedcd\"/><text x=\"400\" y=\"160\" text-anchor=\"middle\" font-size=\"24\" fill=\"%23d4a373\">BAKER%27S DELIGHT</text></svg>')",
+                
+                "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 800 600\"><rect width=\"800\" height=\"600\" fill=\"%23f9f2ea\"/><rect x=\"50\" y=\"150\" width=\"300\" height=\"250\" fill=\"%23d4a373\"/><rect x=\"450\" y=\"150\" width=\"300\" height=\"250\" fill=\"%23d4a373\"/><rect x=\"100\" y=\"250\" width=\"200\" height=\"150\" fill=\"%23faedcd\"/><rect x=\"500\" y=\"250\" width=\"200\" height=\"150\" fill=\"%23faedcd\"/><path d=\"M50,150 L200,80 L350,150 Z\" fill=\"%23e9edc9\"/><path d=\"M450,150 L600,80 L750,150 Z\" fill=\"%23e9edc9\"/><rect x=\"150\" y=\"200\" width=\"100\" height=\"50\" fill=\"%23d4a373\"/><rect x=\"550\" y=\"200\" width=\"100\" height=\"50\" fill=\"%23d4a373\"/><circle cx=\"190\" cy=\"225\" r=\"10\" fill=\"%23000\"/><circle cx=\"590\" cy=\"225\" r=\"10\" fill=\"%23000\"/><rect x=\"170\" y=\"400\" width=\"460\" height=\"100\" fill=\"%23d4a373\"/><rect x=\"220\" y=\"420\" width=\"360\" height=\"80\" fill=\"%23faedcd\"/><text x=\"400\" y=\"470\" text-anchor=\"middle\" font-size=\"24\" fill=\"%23d4a373\">BAKER%27S DELIGHT HQ</text></svg>')",
+                
+                "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 800 600\"><rect width=\"800\" height=\"600\" fill=\"%23f9f2ea\"/><rect x=\"50\" y=\"150\" width=\"200\" height=\"200\" fill=\"%23d4a373\"/><rect x=\"300\" y=\"150\" width=\"200\" height=\"200\" fill=\"%23d4a373\"/><rect x=\"550\" y=\"150\" width=\"200\" height=\"200\" fill=\"%23d4a373\"/><rect x=\"80\" y=\"200\" width=\"140\" height=\"150\" fill=\"%23faedcd\"/><rect x=\"330\" y=\"200\" width=\"140\" height=\"150\" fill=\"%23faedcd\"/><rect x=\"580\" y=\"200\" width=\"140\" height=\"150\" fill=\"%23faedcd\"/><path d=\"M50,150 L150,80 L250,150 Z\" fill=\"%23e9edc9\"/><path d=\"M300,150 L400,80 L500,150 Z\" fill=\"%23e9edc9\"/><path d=\"M550,150 L650,80 L750,150 Z\" fill=\"%23e9edc9\"/><rect x=\"120\" y=\"370\" width=\"560\" height=\"100\" fill=\"%23d4a373\"/><rect x=\"170\" y=\"390\" width=\"460\" height=\"80\" fill=\"%23faedcd\"/><text x=\"400\" y=\"440\" text-anchor=\"middle\" font-size=\"28\" fill=\"%23d4a373\">BAKER%27S DELIGHT INTERNATIONAL</text></svg>')",
+                
+                "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 800 600\"><rect width=\"800\" height=\"600\" fill=\"%23f9f2ea\"/><rect x=\"100\" y=\"100\" width=\"600\" height=\"400\" fill=\"%23d4a373\"/><rect x=\"150\" y=\"150\" width=\"500\" height=\"300\" fill=\"%23faedcd\"/><rect x=\"200\" y=\"200\" width=\"150\" height=\"100\" fill=\"%23fefae0\"/><text x=\"275\" y=\"250\" text-anchor=\"middle\" font-size=\"16\" fill=\"%23d4a373\">BAKER%27S</text><text x=\"275\" y=\"270\" text-anchor=\"middle\" font-size=\"16\" fill=\"%23d4a373\">DELIGHT</text><rect x=\"400\" y=\"200\" width=\"250\" height=\"100\" fill=\"%23fefae0\"/><text x=\"525\" y=\"250\" text-anchor=\"middle\" font-size=\"16\" fill=\"%23d4a373\">COFFEE</text><text x=\"525\" y=\"270\" text-anchor=\"middle\" font-size=\"16\" fill=\"%23d4a373\">PARTNERS</text><rect x=\"200\" y=\"350\" width=\"200\" height=\"80\" fill=\"%23fefae0\"/><text x=\"300\" y=\"395\" text-anchor=\"middle\" font-size=\"18\" fill=\"%23d4a373\">SUPERMARKET</text><text x=\"300\" y=\"415\" text-anchor=\"middle\" font-size=\"18\" fill=\"%23d4a373\">DISTRIBUTION</text><path d=\"M275,200 L275,150 M525,200 L525,150 M300,350 L300,300\" stroke=\"%23d4a373\" stroke-width=\"3\" stroke-linecap=\"round\"/><circle cx=\"400\" cy=\"150\" r=\"30\" fill=\"%23e9edc9\"/><text x=\"400\" y=\"155\" text-anchor=\"middle\" font-size=\"20\" fill=\"%23d4a373\">BD</text></svg>')"
+            ],
+            phaseDescriptions: [
+                "In the Creativity phase, businesses focus on creating products and finding market niches. Structure is informal with founders doing most of the work.",
+                "In the Direction phase, clear leadership and structure emerge. Focus on standardizing operations and establishing efficient processes.",
+                "In the Delegation phase, authority is pushed down to lower-level managers. Teams have more autonomy to make decisions.",
+                "In the Coordination phase, formal systems and processes are established to maintain control while delegating. Focus on consistency across the organization.",
+                "In the Collaboration phase, teamwork and flexibility are emphasized to overcome bureaucracy. Focus on innovation and problem-solving.",
+                "In the Alliances phase, growth comes through partnerships and external relationships. Focus on leveraging networks for expansion."
+            ],
+            crisisDescriptions: [
+                "As your bakery grows, the informal structure becomes chaotic. You need proper management and organization to handle increased demand.",
+                "Your top-down management style is creating frustration. Employees feel micromanaged and unable to use their creativity and expertise.",
+                "With more authority delegated, you're losing oversight. Different branches are making inconsistent decisions affecting quality.",
+                "The systems you've put in place have become bureaucratic. Staff spend more time on paperwork than serving customers or innovating.",
+                "You've reached the limits of organic growth. Continuing to scale requires new approaches beyond internal improvements.",
+                "Managing multiple external partnerships has become complex. Conflicting priorities and communication issues are causing friction."
+            ],
+            scenarios: [
+                [
+                    {
+                        text: "You've been baking for two months now. Your small shop is starting to get noticed in the neighborhood. How do you want to handle the increasing customer demand?",
+                        options: [
+                            {
+                                text: "Work longer hours yourself to meet all demand personally",
+                                impact: { revenue: 15000, customerSatisfaction: 10, employeeMorale: -25, efficiency: -15, crisis: 20 },
+                                feedback: "You've increased revenue by £15,000 by doing everything yourself, but morale has dropped 25 points due to exhaustion. This approach isn't sustainable as you grow."
+                            },
+                            {
+                                text: "Start documenting recipes and processes to make operations more consistent",
+                                impact: { revenue: -2000, customerSatisfaction: -5, employeeMorale: 5, efficiency: 30, crisis: 5 },
+                                feedback: "Good long-term thinking! Documenting processes will help with consistency and training future staff, though it reduces immediate revenue by £2,000 while boosting efficiency by 30 points."
+                            },
+                            {
+                                text: "Bring in a friend to help out informally when needed",
+                                impact: { revenue: 8000, customerSatisfaction: 5, employeeMorale: 10, efficiency: 0, crisis: 10 },
+                                feedback: "The extra help increases revenue by £8,000 and improves morale by 10 points, but the informal arrangement leads to confusion about responsibilities."
+                            }
+                        ]
+                    },
+                    {
+                        text: "Your regular customers are suggesting new products they'd like to see. How do you respond?",
+                        options: [
+                            {
+                                text: "Try to make every customer suggestion, constantly experimenting",
+                                impact: { revenue: -10000, customerSatisfaction: 25, employeeMorale: 15, efficiency: -20, crisis: 20 },
+                                feedback: "Customers appreciate your responsiveness, increasing satisfaction by 25 points, but your kitchen is chaotic with too many different products, costing you £10,000."
+                            },
+                            {
+                                text: "Focus on perfecting your core products first",
+                                impact: { revenue: 20000, customerSatisfaction: -5, employeeMorale: 0, efficiency: 25, crisis: 5 },
+                                feedback: "Smart business move! Your revenue increased by £20,000 and efficiency improved by 25 points. Building a strong core product line creates a stable foundation for growth."
+                            },
+                            {
+                                text: "Host a tasting event to gather feedback on potential new products",
+                                impact: { revenue: 10000, customerSatisfaction: 20, employeeMorale: 15, efficiency: -5, crisis: 10 },
+                                feedback: "Great community engagement! The event generates £10,000 in revenue and increases customer satisfaction by 20 points, but highlights the need for better planning."
+                            }
+                        ]
+                    },
+                    {
+                        text: "Your bakery is gaining popularity and you're struggling to keep up. The informal arrangement with your co-founder is causing confusion about who's responsible for what tasks.",
+                        options: [
+                            {
+                                text: "Have a talk with your co-founder to loosely define roles but keep things flexible",
+                                impact: { revenue: 10000, customerSatisfaction: 10, employeeMorale: 15, efficiency: 10, crisis: 15 },
+                                feedback: "This helps somewhat, improving revenue by £10,000 and morale by 15 points, but without clear structure, confusion still occurs during busy periods."
+                            },
+                            {
+                                text: "Propose a more formal structure with defined responsibilities",
+                                impact: { revenue: 25000, customerSatisfaction: 25, employeeMorale: 5, efficiency: 35, crisis: 40 },
+                                feedback: "This is moving towards addressing the Crisis of Leadership - revenue increases by £25,000 and efficiency jumps 35 points as you establish proper management structure."
+                            },
+                            {
+                                text: "Continue with the flexible approach - everyone does what's needed in the moment",
+                                impact: { revenue: -15000, customerSatisfaction: -20, employeeMorale: -15, efficiency: -30, crisis: 30 },
+                                feedback: "This approach is becoming increasingly chaotic as you grow. Revenue drops by £15,000, efficiency decreases by 30 points, and orders are being missed."
+                            }
+                        ]
+                    }
+                ],
+                [
+                    {
+                        text: "Now that you've established clearer management, you need to standardize operations. What's your approach?",
+                        options: [
+                            {
+                                text: "Set core standards but allow room for staff input on improvements",
+                                impact: { revenue: 25000, customerSatisfaction: 15, employeeMorale: 20, efficiency: 20, crisis: 5 },
+                                feedback: "Good balance! Revenue increases by £25,000 and all metrics improve as you implement structure while valuing staff expertise."
+                            },
+                            {
+                                text: "Focus on training staff thoroughly so they understand the 'why' behind processes",
+                                impact: { revenue: -5000, customerSatisfaction: 20, employeeMorale: 25, efficiency: 15, crisis: 10 },
+                                feedback: "Staff appreciate the investment in their development, increasing morale by 25 points, but this approach costs £5,000 and takes time away from immediate operations."
+                            },
+                            {
+                                text: "Create detailed manuals for every process and require strict adherence",
+                                impact: { revenue: 20000, customerSatisfaction: 0, employeeMorale: -20, efficiency: 30, crisis: 15 },
+                                feedback: "Operations are more consistent now, increasing revenue by £20,000 and efficiency by 30 points, but staff feel restricted and morale drops by 20 points."
+                            }
+                        ]
+                    },
+                    {
+                        text: "Your head baker wants to try some new recipes, but they differ from your standardized menu. How do you respond?",
+                        options: [
+                            {
+                                text: "Allow experimentation only during specific test kitchen days",
+                                impact: { revenue: 20000, customerSatisfaction: 15, employeeMorale: 15, efficiency: 15, crisis: 10 },
+                                feedback: "This structured approach to innovation increases revenue by £20,000 and all metrics improve, maintaining control while allowing some creativity."
+                            },
+                            {
+                                text: "Give the head baker complete freedom to update the menu as they see fit",
+                                impact: { revenue: 30000, customerSatisfaction: 25, employeeMorale: 30, efficiency: -15, crisis: 25 },
+                                feedback: "The baker is thrilled and customers love the new options, boosting revenue by £30,000 and morale by 30 points, but efficiency drops by 15 points due to inconsistency."
+                            },
+                            {
+                                text: "Stick to the established menu - consistency is key at this stage",
+                                impact: { revenue: 15000, customerSatisfaction: -15, employeeMorale: -30, efficiency: 25, crisis: 20 },
+                                feedback: "Your operations run smoothly, increasing efficiency by 25 points and revenue by £15,000, but the baker feels stifled and morale drops by 30 points."
+                            }
+                        ]
+                    },
+                    {
+                        text: "Staff are increasingly frustrated with always having to get your approval for small decisions. Your micromanagement is creating bottlenecks.",
+                        options: [
+                            {
+                                text: "Maintain tight control - it's important that everything meets your standards",
+                                impact: { revenue: -10000, customerSatisfaction: -20, employeeMorale: -35, efficiency: -15, crisis: 30 },
+                                feedback: "You're maintaining quality control, but at a serious cost - revenue drops by £10,000, morale plummets by 35 points, and staff are looking for other jobs."
+                            },
+                            {
+                                text: "Create different approval levels - minor decisions can be made by team leads",
+                                impact: { revenue: 20000, customerSatisfaction: 10, employeeMorale: 20, efficiency: 25, crisis: 15 },
+                                feedback: "This helps with bottlenecks, increasing revenue by £20,000 and efficiency by 25 points, but doesn't fully address the underlying autonomy issues."
+                            },
+                            {
+                                text: "Implement a training program to empower staff to make more decisions independently",
+                                impact: { revenue: 15000, customerSatisfaction: 25, employeeMorale: 35, efficiency: 10, crisis: 40 },
+                                feedback: "You're addressing the Crisis of Autonomy by developing staff capability, increasing morale by 35 points and customer satisfaction by 25 points."
+                            }
+                        ]
+                    }
+                ],
+                [
+                    {
+                        text: "You've delegated more authority to your store managers. One location is thriving, but another is struggling. How do you handle this?",
+                        options: [
+                            {
+                                text: "Have the successful manager train the struggling manager",
+                                impact: { revenue: 30000, customerSatisfaction: 15, employeeMorale: 25, efficiency: 20, crisis: 5 },
+                                feedback: "Great peer learning approach! Revenue increases by £30,000, morale improves by 25 points, and you maintain your delegation structure while improving performance."
+                            },
+                            {
+                                text: "Create a detailed performance dashboard for all locations",
+                                impact: { revenue: 15000, customerSatisfaction: 5, employeeMorale: -5, efficiency: 30, crisis: 15 },
+                                feedback: "The data helps identify issues, boosting efficiency by 30 points and revenue by £15,000, but without addressing management capabilities, improvements are limited."
+                            },
+                            {
+                                text: "Take back control of the struggling location and manage it directly",
+                                impact: { revenue: 20000, customerSatisfaction: 15, employeeMorale: -30, efficiency: -10, crisis: 20 },
+                                feedback: "This location improves, increasing revenue by £20,000, but you're reversing your delegation strategy and creating dependency on your direct involvement."
+                            }
+                        ]
+                    },
+                    {
+                        text: "With multiple locations operating independently, you're noticing inconsistencies in product quality. What's your solution?",
+                        options: [
+                            {
+                                text: "Surprise inspections of all locations to enforce standards",
+                                impact: { revenue: 10000, customerSatisfaction: 15, employeeMorale: -30, efficiency: 10, crisis: 20 },
+                                feedback: "Quality improves temporarily, increasing revenue by £10,000, but staff see this as distrust in their abilities and morale drops by 30 points."
+                            },
+                            {
+                                text: "Allow each location to develop their own signature items alongside core products",
+                                impact: { revenue: 40000, customerSatisfaction: 20, employeeMorale: 30, efficiency: -15, crisis: 30 },
+                                feedback: "Great for local engagement! Revenue jumps by £40,000 and morale improves by 30 points, but efficiency drops by 15 points due to increased coordination challenges."
+                            },
+                            {
+                                text: "Create a shared recipe database with mandatory quality checks",
+                                impact: { revenue: 25000, customerSatisfaction: 25, employeeMorale: 10, efficiency: 25, crisis: 10 },
+                                feedback: "This systematizes quality without removing manager autonomy. Revenue increases by £25,000, customer satisfaction improves by 25 points - a good balance."
+                            }
+                        ]
+                    },
+                    {
+                        text: "You've realized you've lost track of what's happening across your bakery locations. Financial reports are inconsistent, and each store has developed its own way of doing things.",
+                        options: [
+                            {
+                                text: "Develop comprehensive systems for coordination while maintaining local autonomy",
+                                impact: { revenue: 35000, customerSatisfaction: 20, employeeMorale: 15, efficiency: 30, crisis: 40 },
+                                feedback: "You're addressing the Crisis of Control by creating systems that balance coordination and autonomy. Revenue increases by £35,000 and efficiency improves by 30 points."
+                            },
+                            {
+                                text: "Implement standardized reporting and periodic manager meetings",
+                                impact: { revenue: 15000, customerSatisfaction: 10, employeeMorale: 5, efficiency: 20, crisis: 15 },
+                                feedback: "This improves visibility, increasing revenue by £15,000 and efficiency by 20 points, without fully addressing the coordination issues across locations."
+                            },
+                            {
+                                text: "Recentralize decision-making - major decisions must get your approval again",
+                                impact: { revenue: -15000, customerSatisfaction: -5, employeeMorale: -35, efficiency: -20, crisis: 25 },
+                                feedback: "This addresses the immediate control issue but destroys the benefits of delegation. Revenue drops by £15,000 and morale plummets by 35 points."
+                            }
+                        ]
+                    }
+                ],
+                [
+                    {
+                        text: "Your new coordination systems are in place. Some managers are complaining about the additional reporting requirements. How do you respond?",
+                        options: [
+                            {
+                                text: "Review the systems to eliminate unnecessary paperwork",
+                                impact: { revenue: 30000, customerSatisfaction: 15, employeeMorale: 25, efficiency: 30, crisis: 5 },
+                                feedback: "Great approach! By streamlining, you maintain coordination while reducing bureaucratic burden. Revenue increases by £30,000 and all metrics improve."
+                            },
+                            {
+                                text: "Invest in technology to automate reporting and make it less time-consuming",
+                                impact: { revenue: 20000, customerSatisfaction: 20, employeeMorale: 20, efficiency: 35, crisis: 15 },
+                                feedback: "Smart long-term solution! Revenue increases by £20,000 and efficiency jumps by 35 points, though there's a learning curve in the short term."
+                            },
+                            {
+                                text: "Enforce compliance - these systems are essential for coordination",
+                                impact: { revenue: 15000, customerSatisfaction: -10, employeeMorale: -30, efficiency: -15, crisis: 25 },
+                                feedback: "You're getting the data you need and revenue increases by £15,000, but at the cost of manager enthusiasm and creative energy. Morale drops by 30 points."
+                            }
+                        ]
+                    },
+                    {
+                        text: "A manager has an idea for a new product line but complains the approval process will take months. What's your approach?",
+                        options: [
+                            {
+                                text: "Create a fast-track approval process for certain types of innovations",
+                                impact: { revenue: 35000, customerSatisfaction: 20, employeeMorale: 25, efficiency: 15, crisis: 10 },
+                                feedback: "This balances oversight with innovation. Revenue increases by £35,000, morale improves by 25 points, and the business can innovate more quickly."
+                            },
+                            {
+                                text: "Maintain the process - proper evaluation is essential for brand consistency",
+                                impact: { revenue: -15000, customerSatisfaction: 10, employeeMorale: -25, efficiency: 15, crisis: 25 },
+                                feedback: "You're maintaining quality control, but innovation is being stifled by bureaucracy. Revenue drops by £15,000 and morale decreases by 25 points."
+                            },
+                            {
+                                text: "Allow limited-time 'test kitchen' offerings that bypass full approval",
+                                impact: { revenue: 25000, customerSatisfaction: 30, employeeMorale: 35, efficiency: -10, crisis: 20 },
+                                feedback: "Staff love this creative outlet! Morale jumps by 35 points, customer satisfaction increases by 30 points, and revenue grows by £25,000."
+                            }
+                        ]
+                    },
+                    {
+                        text: "Your bakery has become highly systematic, but innovation has slowed dramatically. Staff spend more time on reports than improving the customer experience.",
+                        options: [
+                            {
+                                text: "Restructure to emphasize cross-functional teams and collaborative problem-solving",
+                                impact: { revenue: 40000, customerSatisfaction: 30, employeeMorale: 35, efficiency: 25, crisis: 40 },
+                                feedback: "You're addressing the Crisis of Red Tape! Revenue increases by £40,000, morale jumps by 35 points as you shift toward a more collaborative, flexible approach."
+                            },
+                            {
+                                text: "Reduce some reporting requirements while maintaining key metrics",
+                                impact: { revenue: 15000, customerSatisfaction: 10, employeeMorale: 20, efficiency: 5, crisis: 15 },
+                                feedback: "This helps somewhat, increasing revenue by £15,000 and morale by 20 points, but doesn't address the fundamental cultural issue of bureaucracy."
+                            },
+                            {
+                                text: "Maintain the systems - they ensure consistency across all locations",
+                                impact: { revenue: -25000, customerSatisfaction: -20, employeeMorale: -35, efficiency: 20, crisis: 30 },
+                                feedback: "Operations run smoothly and efficiency increases by 20 points, but revenue drops by £25,000 and morale plummets by 35 points as innovation stalls."
+                            }
+                        ]
+                    }
+                ],
+                [
+                    {
+                        text: "Your collaborative approach is working well internally, but market growth is slowing. What's your next move?",
+                        options: [
+                            {
+                                text: "Form a task force to explore new market opportunities and potential partnerships",
+                                impact: { revenue: 15000, customerSatisfaction: 10, employeeMorale: 30, efficiency: 10, crisis: 5 },
+                                feedback: "Excellent forward thinking! Morale increases by 30 points as this collaborative approach to strategic problems reflects your company's evolved culture."
+                            },
+                            {
+                                text: "Invest heavily in marketing to increase market share in existing locations",
+                                impact: { revenue: 30000, customerSatisfaction: 15, employeeMorale: 5, efficiency: -10, crisis: 15 },
+                                feedback: "You gain some new customers and revenue increases by £30,000, but you're still competing in the same crowded market space with limited growth potential."
+                            },
+                            {
+                                text: "Focus on internal efficiency improvements to maximize profit from existing operations",
+                                impact: { revenue: -25000, customerSatisfaction: -5, employeeMorale: -15, efficiency: 35, crisis: 20 },
+                                feedback: "Efficiency improves by 35 points, but this doesn't address your growth limitation. Revenue decreases by £25,000 and morale drops by 15 points."
+                            }
+                        ]
+                    },
+                    {
+                        text: "A coffee shop chain has approached you about placing your bakery items in their stores. How do you respond?",
+                        options: [
+                            {
+                                text: "Create a limited test program with one or two products in a few locations",
+                                impact: { revenue: 40000, customerSatisfaction: 15, employeeMorale: 15, efficiency: 0, crisis: 10 },
+                                feedback: "This cautious approach minimizes risk while exploring partnership potential. Revenue increases by £40,000 while you learn about wholesale operations."
+                            },
+                            {
+                                text: "Fully embrace the partnership with a comprehensive wholesale program",
+                                impact: { revenue: 75000, customerSatisfaction: 20, employeeMorale: 25, efficiency: -15, crisis: 20 },
+                                feedback: "This opens a major new revenue stream! Revenue jumps by £75,000 and morale improves by 25 points, but efficiency drops as you develop new systems."
+                            },
+                            {
+                                text: "Decline - you want to maintain direct control over all sales channels",
+                                impact: { revenue: -20000, customerSatisfaction: 0, employeeMorale: -15, efficiency: 10, crisis: 25 },
+                                feedback: "You maintain quality control but miss an opportunity for significant expansion. Revenue drops by £20,000 and morale decreases by 15 points."
+                            }
+                        ]
+                    },
+                    {
+                        text: "Despite your collaborative culture and operational excellence, your bakery has reached a growth plateau. Internal improvements alone won't achieve your expansion goals.",
+                        options: [
+                            {
+                                text: "Develop a strategic partnership program with other food businesses and distributors",
+                                impact: { revenue: 100000, customerSatisfaction: 25, employeeMorale: 30, efficiency: 10, crisis: 40 },
+                                feedback: "You're addressing the Crisis of Growth! Revenue jumps by £100,000 and morale improves by 30 points as you move toward the Alliance phase."
+                            },
+                            {
+                                text: "Attempt to grow by opening many new company-owned locations quickly",
+                                impact: { revenue: 50000, customerSatisfaction: -15, employeeMorale: -10, efficiency: -25, crisis: 30 },
+                                feedback: "Revenue increases by £50,000, but rapid expansion stretches your resources thin. Efficiency drops by 25 points and quality control becomes challenging."
+                            },
+                            {
+                                text: "Accept the plateau and focus on maintaining your current successful operations",
+                                impact: { revenue: -50000, customerSatisfaction: 10, employeeMorale: -25, efficiency: 20, crisis: 20 },
+                                feedback: "Your bakery remains profitable and efficiency increases by 20 points, but revenue drops by £50,000 and ambitious staff begin looking for opportunities elsewhere."
+                            }
+                        ]
+                    }
+                ],
+                [
+                    {
+                        text: "Your partnership with the coffee chain is successful, but they want to influence your recipes to better match their brand. How do you handle this?",
+                        options: [
+                            {
+                                text: "Form a joint product development team with representatives from both companies",
+                                impact: { revenue: 100000, customerSatisfaction: 30, employeeMorale: 30, efficiency: 15, crisis: 5 },
+                                feedback: "Excellent collaborative approach! Revenue increases by £100,000 and all metrics improve as you build deeper integration between organizations."
+                            },
+                            {
+                                text: "Create partner-specific variations while maintaining your core recipes",
+                                impact: { revenue: 50000, customerSatisfaction: 20, employeeMorale: 10, efficiency: -15, crisis: 15 },
+                                feedback: "This flexible approach strengthens the partnership while preserving brand identity. Revenue increases by £50,000 but efficiency drops by 15 points."
+                            },
+                            {
+                                text: "Refuse changes - partners must accept your products as they are",
+                                impact: { revenue: -75000, customerSatisfaction: 10, employeeMorale: 5, efficiency: 15, crisis: 25 },
+                                feedback: "You maintain product integrity but create tension in the partnership. Revenue drops by £75,000, limiting further collaboration opportunities."
+                            }
+                        ]
+                    },
+                    {
+                        text: "A supermarket chain wants to carry your products but requires changes to packaging, pricing, and delivery schedules. What's your approach?",
+                        options: [
+                            {
+                                text: "Negotiate compromises that work for both businesses",
+                                impact: { revenue: 75000, customerSatisfaction: 20, employeeMorale: 15, efficiency: 10, crisis: 10 },
+                                feedback: "This balanced approach creates a sustainable partnership. Revenue increases by £75,000 and all metrics improve, building on mutual respect."
+                            },
+                            {
+                                text: "Create a separate sub-brand specifically for retail distribution",
+                                impact: { revenue: 60000, customerSatisfaction: 30, employeeMorale: 25, efficiency: 20, crisis: 15 },
+                                feedback: "Creative solution! Revenue increases by £60,000 and customer satisfaction jumps by 30 points as you allow different distribution channels without compromising your core brand."
+                            },
+                            {
+                                text: "Adapt completely to meet the supermarket's requirements",
+                                impact: { revenue: 125000, customerSatisfaction: -10, employeeMorale: -25, efficiency: -20, crisis: 20 },
+                                feedback: "You gain significant distribution and revenue jumps by £125,000, but risk becoming too dependent on a single powerful partner. Morale drops by 25 points."
+                            }
+                        ]
+                    },
+                    {
+                        text: "Your network of partnerships has grown complex, with competing priorities and communication challenges. Some partners' requirements are conflicting with others.",
+                        options: [
+                            {
+                                text: "Implement a collaborative network approach where all partners have input into the ecosystem",
+                                impact: { revenue: 150000, customerSatisfaction: 35, employeeMorale: 30, efficiency: 25, crisis: 30 },
+                                feedback: "This innovative approach transforms partnership challenges into strategic advantages. Revenue increases by £150,000 and all metrics improve substantially."
+                            },
+                            {
+                                text: "Hire a dedicated partnership management team to handle different relationships",
+                                impact: { revenue: 75000, customerSatisfaction: 15, employeeMorale: 20, efficiency: 20, crisis: 15 },
+                                feedback: "This addresses the immediate coordination issues. Revenue increases by £75,000 and all metrics improve, though it adds another layer of management."
+                            },
+                            {
+                                text: "Reduce the number of partnerships to focus on the most profitable ones",
+                                impact: { revenue: -100000, customerSatisfaction: 10, employeeMorale: 5, efficiency: 35, crisis: 20 },
+                                feedback: "This simplifies operations and efficiency increases by 35 points, but revenue drops by £100,000, limiting your growth potential and market reach."
+                            }
+                        ]
+                    }
+                ]
+            ]
+        };
+        
+        // DOM Elements
+        const screens = {
+            intro: document.getElementById('intro-screen'),
+            main: document.getElementById('main-game'),
+            transition: document.getElementById('phase-transition'),
+            results: document.getElementById('results-screen')
+        };
+        
+        const elements = {
+            startButton: document.getElementById('start-game'),
+            continueButton: document.getElementById('continue-button'),
+            restartButton: document.getElementById('restart-game'),
+            scenarioText: document.getElementById('scenario-text'),
+            decisionContainer: document.getElementById('decision-container'),
+            feedbackMessage: document.getElementById('feedback-message'),
+            crisisFill: document.getElementById('crisis-fill'),
+            bakeryImage: document.getElementById('bakery-image'),
+            phaseTitle: document.querySelector('.phase-title'),
+            phaseTooltip: document.getElementById('phase-tooltip'),
+            transitionTitle: document.getElementById('transition-title'),
+            transitionContent: document.getElementById('transition-content'),
+            journeySummary: document.getElementById('journey-summary'),
+            helpModal: document.getElementById('help-modal'),
+            closeModal: document.querySelector('.close-modal'),
+            confettiCanvas: document.getElementById('confetti-canvas')
+        };
+        
+        const stats = {
+            revenue: document.getElementById('revenue-stat'),
+            customer: document.getElementById('customer-stat'),
+            morale: document.getElementById('morale-stat'),
+            efficiency: document.getElementById('efficiency-stat'),
+            finalRevenue: document.getElementById('final-revenue'),
+            finalCustomer: document.getElementById('final-customer'),
+            finalMorale: document.getElementById('final-morale'),
+            finalEfficiency: document.getElementById('final-efficiency')
+        };
+        
+        // Event Listeners
+        elements.startButton.addEventListener('click', startGame);
+        elements.continueButton.addEventListener('click', moveToNextPhase);
+        elements.restartButton.addEventListener('click', restartGame);
+        elements.closeModal.addEventListener('click', () => {
+            elements.helpModal.style.display = 'none';
+        });
+        
+        window.addEventListener('click', (e) => {
+            if (e.target === elements.helpModal) {
+                elements.helpModal.style.display = 'none';
+            }
+        });
+        
+        // Game Functions
+        function startGame() {
+            showScreen('main');
+            resetGame();
+            updateGameDisplay();
+            loadScenario();
+        }
+        
+        function restartGame() {
+            showScreen('intro');
+            resetGame();
+        }
+        
+        function resetGame() {
+            gameData.currentPhase = 0;
+            gameData.crisisLevel = 0;
+            gameData.decisionsMade = 0;
+            gameData.stats = {
+                revenue: 10000,
+                customerSatisfaction: 85,
+                employeeMorale: 90,
+                efficiency: 70
+            };
+            gameData.history = [];
+        }
+        
+        function showScreen(screenName) {
+            // Hide all screens
+            Object.values(screens).forEach(screen => {
+                screen.classList.remove('active-screen');
+            });
+            
+            // Show the requested screen
+            screens[screenName].classList.add('active-screen');
+        }
+        
+        function updateGameDisplay() {
+            // Update phase information
+            elements.phaseTitle.textContent = `Phase ${gameData.currentPhase + 1}: ${gameData.phaseNames[gameData.currentPhase]}`;
+            elements.phaseTooltip.textContent = gameData.phaseDescriptions[gameData.currentPhase];
+            
+            // Update bakery visualization
+            elements.bakeryImage.style.backgroundImage = gameData.bakeryImages[gameData.currentPhase];
+            
+            // Update stats display
+            stats.revenue.textContent = `£${gameData.stats.revenue.toLocaleString()}`;
+            stats.customer.textContent = `${gameData.stats.customerSatisfaction}%`;
+            stats.morale.textContent = `${gameData.stats.employeeMorale}%`;
+            stats.efficiency.textContent = `${gameData.stats.efficiency}%`;
+            
+            // Update crisis meter
+            elements.crisisFill.style.width = `${gameData.crisisLevel}%`;
+            if (gameData.crisisLevel > 66) {
+                elements.crisisFill.style.backgroundColor = '#ff6b6b';  // Red for high crisis
+            } else if (gameData.crisisLevel > 33) {
+                elements.crisisFill.style.backgroundColor = '#ffe66d';  // Yellow for medium crisis
+            } else {
+                elements.crisisFill.style.backgroundColor = '#6bff84';  // Green for low crisis
+            }
+        }
+        
+        function loadScenario() {
+            // Clear previous decisions and feedback
+            elements.decisionContainer.innerHTML = '';
+            elements.feedbackMessage.style.display = 'none';
+            
+            // Get current phase scenarios
+            const phaseScenarios = gameData.scenarios[gameData.currentPhase];
+            
+            // Get scenario based on decisions made in current phase
+            const scenarioIndex = Math.min(gameData.decisionsMade, phaseScenarios.length - 1);
+            const currentScenario = phaseScenarios[scenarioIndex];
+            
+            // Update scenario text
+            elements.scenarioText.textContent = currentScenario.text;
+            
+            // Create decision buttons
+            currentScenario.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'decision-btn';
+                button.textContent = option.text;
+                button.addEventListener('click', () => makeDecision(index));
+                elements.decisionContainer.appendChild(button);
+            });
+        }
+        
+        function makeDecision(optionIndex) {
+            // Get current scenario and selected option
+            const phaseScenarios = gameData.scenarios[gameData.currentPhase];
+            const scenarioIndex = Math.min(gameData.decisionsMade, phaseScenarios.length - 1);
+            const currentScenario = phaseScenarios[scenarioIndex];
+            const selectedOption = currentScenario.options[optionIndex];
+            
+            // Apply impact to game stats
+            gameData.stats.revenue += selectedOption.impact.revenue;
+            gameData.stats.customerSatisfaction = Math.max(0, Math.min(100, gameData.stats.customerSatisfaction + selectedOption.impact.customerSatisfaction));
+            gameData.stats.employeeMorale = Math.max(0, Math.min(100, gameData.stats.employeeMorale + selectedOption.impact.employeeMorale));
+            gameData.stats.efficiency = Math.max(0, Math.min(100, gameData.stats.efficiency + selectedOption.impact.efficiency));
+            
+            // Round revenue to avoid decimals
+            gameData.stats.revenue = Math.round(gameData.stats.revenue);
+            
+            // Increase crisis level
+            gameData.crisisLevel += selectedOption.impact.crisis;
+            
+            // Record decision in history
+            gameData.history.push({
+                phase: gameData.currentPhase,
+                scenario: currentScenario.text,
+                decision: selectedOption.text,
+                feedback: selectedOption.feedback,
+                impact: { ...selectedOption.impact }
+            });
+            
+            // Show feedback
+            elements.feedbackMessage.textContent = selectedOption.feedback;
+            elements.feedbackMessage.className = 'feedback-message';
+            
+            if (selectedOption.impact.revenue > 0 && selectedOption.impact.employeeMorale > 0) {
+                elements.feedbackMessage.classList.add('positive');
+            } else if (selectedOption.impact.revenue < 0 || selectedOption.impact.employeeMorale < 0) {
+                elements.feedbackMessage.classList.add('negative');
+            } else {
+                elements.feedbackMessage.classList.add('neutral');
+            }
+            
+            elements.feedbackMessage.style.display = 'block';
+            
+            // Update game display
+            updateGameDisplay();
+            
+            // Increment decisions made
+            gameData.decisionsMade++;
+            
+            // Disable all decision buttons
+            document.querySelectorAll('.decision-btn').forEach(btn => {
+                btn.disabled = true;
+            });
+            
+            // Add next button
+            const nextButton = document.createElement('button');
+            nextButton.textContent = 'Next';
+            nextButton.className = 'next-scenario-btn';
+            nextButton.style.marginTop = '20px';
+            nextButton.style.backgroundColor = '#4ecdc4';
+            nextButton.addEventListener('click', () => {
+                // Check if phase is complete (crisis level too high or all scenarios done)
+                if (gameData.crisisLevel >= 100 || gameData.decisionsMade >= phaseScenarios.length) {
+                    if (gameData.currentPhase >= gameData.phaseNames.length - 1) {
+                        showResults();
+                    } else {
+                        showPhaseTransition();
+                    }
+                } else {
+                    loadScenario();
+                }
+            });
+            elements.decisionContainer.appendChild(nextButton);
+        }
+        
+        function showPhaseTransition() {
+            showScreen('transition');
+            
+            // Update transition screen content
+            elements.transitionTitle.textContent = gameData.crisisNames[gameData.currentPhase];
+            elements.transitionContent.innerHTML = `<p>${gameData.crisisDescriptions[gameData.currentPhase]}</p>`;
+        }
+        
+        function moveToNextPhase() {
+            // Increment phase
+            gameData.currentPhase++;
+            
+            // Reset crisis level and decisions made
+            gameData.crisisLevel = 0;
+            gameData.decisionsMade = 0;
+            
+            // Show main game screen
+            showScreen('main');
+            
+            // Update display for new phase
+            updateGameDisplay();
+            
+            // Load first scenario of new phase
+            loadScenario();
+        }
+        
+        function showResults() {
+            showScreen('results');
+            
+            // Update final stats
+            stats.finalRevenue.textContent = `£${gameData.stats.revenue.toLocaleString()}`;
+            stats.finalCustomer.textContent = `${gameData.stats.customerSatisfaction}%`;
+            stats.finalMorale.textContent = `${gameData.stats.employeeMorale}%`;
+            stats.finalEfficiency.textContent = `${gameData.stats.efficiency}%`;
+            
+            // Generate journey summary
+            let summaryHTML = '';
+            for (let i = 0; i < gameData.phaseNames.length; i++) {
+                let phaseDecisions = gameData.history.filter(h => h.phase === i);
+                if (phaseDecisions.length > 0) {
+                    summaryHTML += `
+                        <div class="phase-summary">
+                            <h3>Phase ${i + 1}: ${gameData.phaseNames[i]}</h3>
+                            <p>Key Decision: ${phaseDecisions[phaseDecisions.length - 1].decision}</p>
+                            <p>Outcome: ${phaseDecisions[phaseDecisions.length - 1].feedback}</p>
+                        </div>
+                    `;
+                }
+            }
+            
+            elements.journeySummary.innerHTML = summaryHTML;
+            
+            // Show confetti for game completion
+            showConfetti();
+        }
+        
+        function showConfetti() {
+            elements.confettiCanvas.style.display = 'block';
+            const canvas = elements.confettiCanvas;
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const ctx = canvas.getContext('2d');
+            const pieces = [];
+            const numberOfPieces = 200;
+            const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#6bff84', '#ff8c8c'];
+            
+            function createPieces() {
+                for (let i = 0; i < numberOfPieces; i++) {
+                    pieces.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height - canvas.height,
+                        r: Math.random() * 5 + 2,
+                        d: Math.random() * numberOfPieces,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        tilt: Math.floor(Math.random() * 10) - 10,
+                        opacity: Math.random() + 0.5,
+                        speedY: Math.random() + 1,
+                        speedX: Math.random() * 2 - 1
+                    });
+                }
+            }
+            
+            function drawConfetti() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                pieces.forEach((p) => {
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = p.opacity;
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2, true);
+                    ctx.fill();
+                    
+                    p.y += p.speedY;
+                    p.x += p.speedX;
+                    
+                    if (p.y > canvas.height) {
+                        p.y = -10;
+                        p.x = Math.random() * canvas.width;
+                    }
+                });
+                
+                window.requestAnimationFrame(drawConfetti);
+            }
+            
+            createPieces();
+            drawConfetti();
+            
+            setTimeout(() => {
+                elements.confettiCanvas.style.display = 'none';
+            }, 8000);
+        }
+        
+        // Helper function to format currency
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-GB', {
+                style: 'currency',
+                currency: 'GBP',
+            }).format(value);
+        }
+    </script>
+</body>
+</html>
